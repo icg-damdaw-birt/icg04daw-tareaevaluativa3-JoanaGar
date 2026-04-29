@@ -6,12 +6,14 @@
     movie,
     showActions = true,
     ondelete,
-    onedit
+    onedit,
+    onfavorite
   }: {
     movie: Movie;
     showActions?: boolean;
     ondelete?: (id: string) => void;
     onedit?: (movie: Movie) => void;
+    onfavorite?: (id: string) => void;
   } = $props();
 
   // Handlers: ejecutan callbacks del padre directamente
@@ -21,6 +23,10 @@
 
   function handleEdit() {
     onedit?.(movie);
+  }
+
+  function handleFavorite() {
+    onfavorite?.(movie.id);
   }
 </script>
 
@@ -51,6 +57,16 @@
 
     {#if showActions}
       <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          class="w-full rounded border px-3 py-2 transition {movie.isFavorite 
+            ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100' 
+            : 'border-slate-300 text-slate-700 hover:bg-slate-50'}"
+          onclick={handleFavorite}
+          title={movie.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+        >
+          {movie.isFavorite ? '❤️' : '🤍'} Favorito
+        </button>
         <button
           type="button"
           class="w-full rounded border border-slate-300 px-3 py-2 text-slate-700 transition hover:bg-slate-50"

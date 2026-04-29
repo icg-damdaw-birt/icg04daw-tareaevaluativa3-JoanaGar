@@ -80,6 +80,19 @@
     editingMovie = movie;
   }
 
+  // Alterna estado de favorito de una película
+  async function handleFavorite(id: string) {
+    feedbackMessage = null;
+    moviesStore.clearError();
+
+    const ok = await moviesStore.toggleFavorite(id);
+    if (ok) {
+      const movie = moviesStore.movies.find(m => m.id === id);
+      const status = movie?.isFavorite ? 'Añadida a favoritos' : 'Quitada de favoritos';
+      feedbackMessage = { type: 'info', text: status };
+    }
+  }
+
   // Limpia el formulario lateral y vuelve al modo de creación.
   function handleCancelEdit() {
     editingMovie = null;
@@ -119,7 +132,7 @@
       {:else}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {#each moviesStore.movies as movie (movie.id)}
-            <MovieCard {movie} ondelete={handleDelete} onedit={handleEdit} />
+            <MovieCard {movie} ondelete={handleDelete} onedit={handleEdit} onfavorite={handleFavorite} />
           {/each}
         </div>
       {/if}

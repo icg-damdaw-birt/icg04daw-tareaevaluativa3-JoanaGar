@@ -289,12 +289,107 @@ describe('API Service - Autenticación', () => {
       }
     });
   });
+
+  // ==========================================
+  // GRUPO: Películas - toggleFavorite
+  // ==========================================
+  describe('toggleFavorite()', () => {
+    it('debería alternar favorito de una película con PATCH', async () => {
+      // ARRANGE
+      const token = 'valid-token';
+      const movieId = 'movie-123';
+      const favoritedMovie = {
+        id: movieId,
+        title: 'Inception',
+        director: 'Christopher Nolan',
+        year: 2010,
+        isFavorite: true,
+        rating: 0,
+      };
+
+      authToken.set(token);
+
+      (globalThis.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'application/json' : null
+        },
+        json: async () => favoritedMovie
+      });
+
+      // ACT
+      const result = await api.toggleFavorite(movieId);
+
+      // ASSERT
+      expect(result).toEqual(favoritedMovie);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+
+      const callArgs = (globalThis.fetch as any).mock.calls[0];
+      expect(callArgs[0]).toBe(`http://localhost:3000/api/movies/${movieId}/favorite`);
+      expect(callArgs[1].method).toBe('PATCH');
+      
+      const headers = callArgs[1].headers as Headers;
+      expect(headers.get('Authorization')).toBe(`Bearer ${token}`);
+    });
+
+    it('debería fallar si no tiene permisos (403)', async () => {
+      // ARRANGE
+      const token = 'valid-token';
+      const movieId = 'other-user-movie';
+
+      authToken.set(token);
+
+      (globalThis.fetch as any).mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'application/json' : null
+        },
+        json: async () => ({ error: 'No tienes permisos para modificar esta película' })
+      });
+
+      // ACT & ASSERT
+      try {
+        await api.toggleFavorite(movieId);
+        expect(true).toBe(false);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApiError);
+        expect((error as ApiError).status).toBe(403);
+      }
+    });
+
+    it('debería fallar si la película no existe (404)', async () => {
+      // ARRANGE
+      const token = 'valid-token';
+      const movieId = 'nonexistent';
+
+      authToken.set(token);
+
+      (globalThis.fetch as any).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        headers: {
+          get: (name: string) => name === 'content-type' ? 'application/json' : null
+        },
+        json: async () => ({ error: 'Película no encontrada' })
+      });
+
+      // ACT & ASSERT
+      try {
+        await api.toggleFavorite(movieId);
+        expect(true).toBe(false);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApiError);
+        expect((error as ApiError).status).toBe(404);
+        expect((error as ApiError).message).toBe('Película no encontrada');
+      }
+    });
+  });
 });
 
 /**
  * NOTAS PARA ESTUDIANTES:
- * 
- * 1. Estructura del mock de Response
  *    - ok: boolean (indica si status está en rango 200-299)
  *    - status: número del código HTTP
  *    - headers.get(): función para obtener headers
