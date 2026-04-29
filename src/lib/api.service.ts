@@ -128,7 +128,4 @@ export const api = {
   // Alterna el estado de favorito de una película (true ↔ false).
   toggleFavorite: (id: string) =>
     request<Movie>(`/api/movies/${id}/favorite`, { method: 'PATCH' }),
-    // Califica una película con una puntuación de 0 a 5.
-  rateMovie: (id: string, rating: number) =>
-    request<Movie>(`/api/movies/${id}/rating`, { method: 'PATCH', body: { rating } }),
 };

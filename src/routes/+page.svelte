@@ -93,17 +93,6 @@
     }
   }
 
-  // Califica una película
-  async function handleRateMovie(movie: Movie, rating: number) {
-    feedbackMessage = null;
-    moviesStore.clearError();
-
-    const ok = await moviesStore.rateMovie(movie, rating);
-    if (ok) {
-      feedbackMessage = { type: "info", text: `Película '${movie.title}' calificada con ${rating} estrellas.` };
-    }
-  }
-
   // Limpia el formulario lateral y vuelve al modo de creación.
   function handleCancelEdit() {
     editingMovie = null;
@@ -143,7 +132,7 @@
       {:else}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {#each moviesStore.movies as movie (movie.id)}
-            <MovieCard {movie} ondelete={handleDelete} onedit={handleEdit} onfavorite={handleFavorite} onrate={handleRateMovie} />
+            <MovieCard {movie} ondelete={handleDelete} onedit={handleEdit} onfavorite={handleFavorite} />
           {/each}
         </div>
       {/if}
